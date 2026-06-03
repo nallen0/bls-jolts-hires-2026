@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BLS JOLTS — Hires Analysis, April 2026</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --text: #c8ccd8;
+      --text-dim: #8890a0;
+      --accent: #4a9eff;
+      --green: #4ade80;
+      --red: #ff5c5c;
+      --yellow: #fbbf24;
+      --purple: #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f1117 0%, #12192e 50%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 24px 40px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(74,158,255,0.12);
+      border: 1px solid rgba(74,158,255,0.3);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(1.7rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: #e8eaf0;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: var(--text-dim);
+      max-width: 640px;
+      margin: 0 auto 28px;
+      font-size: 1rem;
+    }
+
+    /* ── KPI strip ── */
+    .kpi-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 24px;
+      text-align: center;
+      min-width: 150px;
+    }
+    .kpi .val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .kpi .lbl { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+    .kpi .chg { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+    .down { color: var(--red); }
+    .up   { color: var(--green); }
+    .flat { color: var(--text-dim); }
+
+    /* ── Nav tabs ── */
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,17,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding: 0 24px;
+    }
+    .tabs a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.87rem;
+      font-weight: 500;
+      padding: 14px 20px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tabs a:hover { color: var(--text); border-bottom-color: var(--border); }
+    .tabs a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Layout ── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+    .section {
+      margin-top: 48px;
+    }
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .section-num {
+      background: rgba(74,158,255,0.12);
+      border: 1px solid rgba(74,158,255,0.25);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .section-header h2 {
+      font-size: 1.25rem;
+      color: #e8eaf0;
+      font-weight: 600;
+    }
+    .section-header p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .chart-card img {
+      width: 100%;
+      display: block;
+    }
+    .chart-caption {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.84rem;
+      color: var(--text-dim);
+    }
+    .chart-caption strong { color: var(--text); }
+
+    /* insight pills */
+    .insights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .insight {
+      background: rgba(15,17,23,0.7);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .insight.neg { border-color: rgba(255,92,92,0.35); color: var(--red); }
+    .insight.pos { border-color: rgba(74,222,128,0.35); color: var(--green); }
+    .insight.neutral { border-color: rgba(251,191,36,0.35); color: var(--yellow); }
+
+    /* two-col grid */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="badge">BLS JOLTS — April 2026 Release</div>
+  <h1>U.S. Labor Market Hires Analysis</h1>
+  <p>Seasonally adjusted hires levels and rates across industries and regions,
+     with year-over-year and month-over-month comparisons.</p>
+
+  <div class="kpi-bar">
+    <div class="kpi">
+      <div class="val" style="color:var(--accent)">5,116K</div>
+      <div class="lbl">Total Hires — Apr 2026</div>
+      <div class="chg down">▼ 419K from March</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--yellow)">3.2%</div>
+      <div class="lbl">National Hires Rate</div>
+      <div class="chg down">▼ 0.3 pp month-over-month</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--red)">−275K</div>
+      <div class="lbl">Year-over-Year Change</div>
+      <div class="chg down">Apr 2025 → Apr 2026</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--purple)">6.1%</div>
+      <div class="lbl">Highest Rate Sector</div>
+      <div class="chg up">Arts &amp; Entertainment</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--green)">0.9%</div>
+      <div class="lbl">Lowest Rate Sector</div>
+      <div class="chg flat">Federal Government</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tabs ── -->
+<nav class="tabs">
+  <a href="#overview" class="active">Overview</a>
+  <a href="#industries">Industries</a>
+  <a href="#monthly">Monthly Change</a>
+  <a href="#regions">Regions</a>
+  <a href="#yoy">Year-over-Year</a>
+  <a href="#heatmap">Heatmap</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── 1: Total trend ── -->
+  <div class="section" id="overview">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>U.S. Total Hires — Level &amp; Rate Over Time</h2>
+        <p>Five reporting periods spanning April 2025 through April 2026 (preliminary).</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart1_total_trend.png" alt="Total hires level and rate over time" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> After surging to 5,535K in March 2026, total hires
+        fell sharply by 419K (−7.6%) in April — the largest single-month drop in this
+        window. The national hires rate dropped from 3.5% to 3.2%.
+        <div class="insights">
+          <span class="insight neg">Mar→Apr: −419K hires</span>
+          <span class="insight neg">Rate: 3.5% → 3.2%</span>
+          <span class="insight neutral">Feb 2026 was lowest point at 4,899K</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2: Industry rates ── -->
+  <div class="section" id="industries">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>Hires Rates by Industry — April 2026 vs. April 2025</h2>
+        <p>Green bars indicate the sector hired at a higher rate than a year ago; red bars show a decline.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart2_industry_rates.png" alt="Industry hires rates comparison" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> Only Mining &amp; Logging and Construction posted
+        higher rates in April 2026 vs. April 2025. Every other private sector saw equal
+        or lower rates. Federal Government fell to 0.9% — its lowest in this dataset.
+        <div class="insights">
+          <span class="insight pos">Mining &amp; Logging: 3.9% → 3.7% (up YoY)</span>
+          <span class="insight neg">Financial activities: 2.3% → 1.9%</span>
+          <span class="insight neg">Prof. &amp; Business: 4.9% → 4.2%</span>
+          <span class="insight neg">Federal: 1.1% → 0.9%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3: Monthly change ── -->
+  <div class="section" id="monthly">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>Monthly Change in Hires: March → April 2026</h2>
+        <p>Absolute change in thousands of hires. Most sectors contracted in April.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart3_mom_change.png" alt="Month-over-month change by industry" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> Professional &amp; Business Services led the
+        April pullback (−131K), followed by Trade/Transport/Utilities (−134K) and
+        Private Education &amp; Health (−67K). Arts &amp; Entertainment bucked the
+        trend with +25K — the largest positive outlier.
+        <div class="insights">
+          <span class="insight neg">Biggest drop: Trade/Transport −134K</span>
+          <span class="insight neg">Prof. &amp; Business: −131K</span>
+          <span class="insight pos">Arts &amp; Entertainment: +25K</span>
+          <span class="insight pos">Construction: +17K</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4: Regional ── -->
+  <div class="section" id="regions">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>Regional Hires Rates Over Time</h2>
+        <p>All four U.S. Census regions compared across five reporting periods.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart4_regional_rates.png" alt="Regional hires rates over time" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> The Midwest was the only region to hold steady
+        in April (3.5%, unchanged from March) while all others declined. The Northeast
+        saw the largest drop to 2.6%, its lowest rate in the dataset. All regions dipped
+        in February before recovering in March.
+        <div class="insights">
+          <span class="insight flat">Midwest: flat at 3.5%</span>
+          <span class="insight neg">Northeast: 2.9% → 2.6% (lowest)</span>
+          <span class="insight neg">West: 3.6% → 3.2%</span>
+          <span class="insight neutral">South leads in absolute volume (2,029K)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5: YoY ── -->
+  <div class="section" id="yoy">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>Year-over-Year Change in Hires Levels</h2>
+        <p>April 2025 vs. April 2026 — which sectors are hiring more or less than a year ago?</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart5_yoy.png" alt="Year-over-year change by sector" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> Most sectors hired <em>less</em> in April 2026
+        than April 2025. Leisure &amp; Hospitality (+1.7%) and Accommodation &amp; Food
+        (+1.9%) are among the few with modest YoY gains. Manufacturing and Information
+        showed notable YoY declines.
+        <div class="insights">
+          <span class="insight pos">Accommodation &amp; Food: +1.9% YoY</span>
+          <span class="insight pos">Leisure &amp; Hospitality: +1.7% YoY</span>
+          <span class="insight neg">Information: −6.0% YoY</span>
+          <span class="insight neg">Financial activities: −17.5% YoY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6: Heatmap ── -->
+  <div class="section" id="heatmap">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>Hires Rate Heatmap — Industry × Time</h2>
+        <p>Color intensity reveals both the structural differences between sectors and how each shifted over time.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <img src="chart6_heatmap.png" alt="Hires rate heatmap" />
+      <div class="chart-caption">
+        <strong>Key finding:</strong> Leisure &amp; Hospitality, Accommodation &amp; Food,
+        and Arts &amp; Entertainment form a persistently "hot" cluster (5–6.5%) across
+        all periods. Government and Federal remain structurally cold (&lt;1.5%).
+        The March 2026 column is uniformly elevated — a broad-based surge before April's
+        pullback.
+        <div class="insights">
+          <span class="insight neutral">March 2026 = broadest surge across sectors</span>
+          <span class="insight neg">Feb 2026 = widespread trough</span>
+          <span class="insight pos">Arts &amp; Ent. rebounded to 6.1% in Apr</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Footer ── -->
+<footer>
+  Data: <a href="https://www.bls.gov/jlt/" target="_blank">Bureau of Labor Statistics JOLTS</a>,
+  April 2026 release (preliminary) &mdash; Seasonally adjusted &bull;
+  Generated with Claude Code &bull; RPI Research Group Demo
+</footer>
+
+<script>
+  // Highlight active tab on scroll
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.tabs a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
